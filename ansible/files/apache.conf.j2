@@ -1,0 +1,9 @@
+<VirtualHost *:{{ http_port }}>
+    ServerName {{ http_host }}
+    DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/{{ http_host }}
+    Options +ExecCGI
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

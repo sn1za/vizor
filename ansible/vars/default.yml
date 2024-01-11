@@ -1,0 +1,11 @@
+#HTTP Settings
+http_host: "domain.com"
+http_conf: "domain.com.conf"
+http_port: "80"
+
+
+#MySQL Settings
+mysql_root_password: "password"
+mysql_db: "domain"
+mysql_user: "domainuser"
+mysql_password: "mypassword"

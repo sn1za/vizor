@@ -1,0 +1,126 @@
+---
+- name: Deploy LAMP stack with WordPress
+  hosts: ubuntu1
+  become: yes
+  vars_files:
+    - vars/default.yml
+    
+
+  tasks:
+
+    # - name: Update apt cache
+    #   apt:
+    #     update_cache: yes
+
+    # # - name: Check if the nginx is installed
+    # #   ansible.builtin.package:
+    # #     name: nginx
+    # #   register: nginx_package_status
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - curl 
+        - gnupg2
+        - ca-certificates
+        - lsb-release
+        - ubuntu-keyring
+        - apache2
+        - mysql-server
+        - php 
+        - php-mysql 
+        - libapache2-mod-php
+        - python3-pymysql
+        - nginx
+
+    - name: Nginx conf file
+      template:
+        src: "files/nginx.conf.j2"
+        dest: "/etc/nginx/conf.d/{{ http_conf }}"
+      notify: Reload Nginx
+
+    - name: Removes "default" site
+      file:
+        path: "/etc/nginx/sites-enabled/default"
+        state: absent
+      notify: Reload Nginx
+
+    - name: Create domain root
+      file:
+        path: "/var/www/{{ http_host }}"
+        state: directory
+        owner: "www-data"
+        group: "www-data"
+        mode: '0755'
+
+    # - name: Disable default Apache site
+    #   shell: /usr/sbin/a2dissite 000-default.conf
+    #   notify: Restart Apache
+
+    - name: Apache conf
+      template:
+        src: "files/apache.conf.j2"
+        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+
+    - name: Enable new site
+      shell: /usr/sbin/a2ensite {{ http_conf }}
+      notify: Restart Apache
+
+
+    - name: Set the root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Creates database for WordPress
+      mysql_db:
+        name: "{{ mysql_db }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Create MySQL user for WordPress
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_password }}"
+        priv: "{{ mysql_db }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Download WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/var/www/{{ http_host }}"
+        remote_src: yes
+        owner: www-data
+        group: www-data
+        creates: /var/www/{{ http_host }}/wp-config.php
+        extra_opts:
+        - --strip-components=1
+
+    - name: Set permissions for directories
+      shell: "/usr/bin/find /var/www/{{ http_host }}/ -type d -exec chmod 750 {} \\;"
+
+    - name: Set permissions for files
+      shell: "/usr/bin/find /var/www/{{ http_host }}/ -type f -exec chmod 640 {} \\;"
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+
