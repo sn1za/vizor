@@ -30,10 +30,10 @@ services:
     restart: unless-stopped
     container_name: mysql
     environment:
-      - MYSQL_ROOT_PASSWORD: "R00tPass"
-      - MYSQL_DATABASE: "domain"
-      - MYSQL_USER: "domainuser"
-      - MYSQL_PASSWORD: "UserP@ss"
+      - MYSQL_ROOT_PASSWORD='R00tPass'
+      - MYSQL_DATABASE='domain'
+      - MYSQL_USER='domainuser'
+      - MYSQL_PASSWORD='UserPass'
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
