@@ -10,10 +10,9 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-    #depends_on:
-      #- php
-        #- mysql
-      #- apache
+    depends_on:
+      - mysql
+      - apache
     networks:
       - wp-network
 
@@ -31,10 +30,10 @@ services:
     restart: unless-stopped
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: R00tP@s$
-      MYSQL_DATABASE: domain
-      MYSQL_USER: domainuser
-      MYSQL_PASSWORD: UserP@$$
+      - MYSQL_ROOT_PASSWORD: "R00tP@ss"
+      - MYSQL_DATABASE: "domain"
+      - MYSQL_USER: "domainuser"
+      - MYSQL_PASSWORD: "UserP@ss"
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
