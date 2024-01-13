@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     container_name: nginx
     ports:
-      - "880:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
@@ -39,6 +39,11 @@ services:
       MYSQL_PASSWORD: UserPass
     volumes:
       - ./mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql -u domainuser -p'UserPass' -e 'SHOWTABLES FROM domain;'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
     networks:
       - wp-network
 
