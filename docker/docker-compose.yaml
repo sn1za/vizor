@@ -17,11 +17,14 @@ services:
       - wp-network
 
   apache:
-    image: php:8.2-apache    #check the php version you need for your project4
+    image: php:8.2-apache  
     container_name: apache
     volumes:
       - ./apache/html/domain.com:/var/www/html
-      - ./apache/domain.conf:/usr/local/apache2/conf/httpd.conf:/etc/apache2/sites-enabled/000-default.conf
+      #- ./apache/domain.conf:/usr/local/apache2/conf/httpd.conf
+      - ./apache/domain.conf:/etc/apache2/sites-enabled/000-default.conf
+    depends_on:
+      - mysql
     networks:
       - wp-network
 
