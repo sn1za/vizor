@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    #depends_on:
+      #- php
+        #- mysql
+      #- apache
+    networks:
+      - wp-network
+
+  apache:
+    image: php:8.2-apache    #check the php version you need for your project4
+    container_name: apache
+    volumes:
+      - ./apache/html/domain.com:/var/www/html
+      - ./apache/domain.conf:/usr/local/apache2/conf/httpd.conf:/etc/apache2/sites-enabled/000-default.conf
+    networks:
+      - wp-network
+
+  mysql:
+    image: mysql:8.1.0
+    restart: unless-stopped
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: R00tP@s$
+      MYSQL_DATABASE: domain
+      MYSQL_USER: domainuser
+      MYSQL_PASSWORD: UserP@$$
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - wp-network
+
+networks:
+  wp-network:
+    driver: bridge
