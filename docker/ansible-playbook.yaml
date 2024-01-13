@@ -43,16 +43,59 @@
         
     - name: Install docker-compose
       get_url:
-        url : https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        url : https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64
         dest: /usr/local/bin/docker-compose
-        mode: '755'
+        mode: '750'
 
     - name: Clone the repository
       git:
         repo: https://github.com/sn1za/vizor.git 
-        dest: /tmp/vizor/
+        dest: /var/domain/
+
+    - name: Download WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/var/domain/docker/apache/html/domain.com/"
+        remote_src: yes
+        creates: /var/domain/docker/apache/html/domain.com/wp-config-sample.php
+        extra_opts:
+        - --strip-components=1
+
+    - name: Copy file with owner and permissions
+      copy:
+        src: /var/domain/docker/apache/html/domain.com/wp-config-sample.php
+        dest: /var/domain/docker/apache/html/domain.com/wp-config.php
+        remote_src: yes
+
+    - name: Replace database name in wp-config.php
+      replace:
+        path: /var/domain/docker/apache/html/domain.com/wp-config.php
+        regexp: 'database_name_here'
+        replace: 'domain'
+        before: 'DB_COLLATE'
+
+    - name: Replace username name in wp-config.php
+      replace:
+        path: /var/domain/docker/apache/html/domain.com/wp-config.php
+        regexp: 'username_here'
+        replace: 'domainuser'
+        before: 'DB_COLLATE'
+
+    - name: Replace password name in wp-config.php
+      replace:
+        path: /var/domain/docker/apache/html/domain.com/wp-config.php
+        regexp: 'password_here'
+        replace: 'UserPass'
+        before: 'DB_COLLATE'
+
+    - name: Replace DB host in wp-config.php
+      replace:
+        path: /var/domain/docker/apache/html/domain.com/wp-config.php
+        regexp: 'localhost'
+        replace: 'mysql'
+        before: 'DB_COLLATE'
 
     - name: Start Docker Compose
       command: docker-compose up -d
       args:
-        chdir: /tmp/vizor/docker/
+        chdir: /var/domain/docker/

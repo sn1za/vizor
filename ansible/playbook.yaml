@@ -98,7 +98,7 @@
         remote_src: yes
         owner: www-data
         group: www-data
-        creates: /var/www/{{ http_host }}/wp-config.php
+        creates: /var/www/{{ http_host }}/wp-config-sample.php
         extra_opts:
         - --strip-components=1
 

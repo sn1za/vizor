@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     container_name: nginx
     ports:
-      - "8080:80"
+      - "880:80"
       - "8443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -17,11 +17,11 @@ services:
       - wp-network
 
   apache:
-    image: php:8.2-apache  
+    build:
+      dockerfile: ./php-dockerfile
     container_name: apache
     volumes:
       - ./apache/html/domain.com:/var/www/html
-      #- ./apache/domain.conf:/usr/local/apache2/conf/httpd.conf
       - ./apache/domain.conf:/etc/apache2/sites-enabled/000-default.conf
     depends_on:
       - mysql
@@ -29,14 +29,14 @@ services:
       - wp-network
 
   mysql:
-    image: mysql:8.1.0
+    image: mysql:8.2.0
     restart: unless-stopped
     container_name: mysql
     environment:
-      - MYSQL_ROOT_PASSWORD='R00tPass'
-      - MYSQL_DATABASE='domain'
-      - MYSQL_USER='domainuser'
-      - MYSQL_PASSWORD='UserPass'
+      MYSQL_ROOT_PASSWORD: R00tPass
+      MYSQL_DATABASE: domain
+      MYSQL_USER: domainuser
+      MYSQL_PASSWORD: UserPass
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
